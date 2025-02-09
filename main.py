@@ -1,5 +1,6 @@
 import speech_recognition
 import sys, os, re
+from textwrap import wrap
 allowed_extensions = r"(.*\.wma|.*\.mp3|.*\.flac|.*\.wav)"
 
 def speech_to_text(audiofile:str) -> str:
@@ -9,9 +10,12 @@ def speech_to_text(audiofile:str) -> str:
         said = r.recognize_google(audio, language="nl_NL")
         return said
        
-
 def get_audiofiles() -> list:
-    files = os.listdir("./input")
+    try:
+        files = os.listdir("./input")
+    except FileNotFoundError:
+        print("No input has been found. Please put your files in the input folder.")
+        os.mkdir("./input")
     allowed=[]
     for file in files:
          if re.search(allowed_extensions,file):
@@ -21,8 +25,11 @@ def get_audiofiles() -> list:
 def write_output(parsed:dict[str,str]) -> None:
     with open('output.txt','w') as f:
         for key in parsed:
-            f.write(key+"\n")
-            f.write(parsed[key]+"\n")
+            f.write(key:+"\n")
+            #Get multiline support for long outputs
+            splicedstring = wrap(parsed[key], 300)
+            for line in splicedstring:
+                f.write(line+"\n")
 
 if __name__ == '__main__':
     files = get_audiofiles()
